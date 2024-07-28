@@ -4,7 +4,6 @@ pragma solidity >=0.8.2 <0.9.0;
 /// @title Student Registry Contract
 /// @notice This contract is used for managing student records.
 /// @dev This contract allows adding, updating, and deleting student records.
-
 contract StudentRegistry {
     /// @dev Structure to store student information.
     struct Student {
@@ -22,11 +21,11 @@ contract StudentRegistry {
     /// @param studentId Unique ID of the student.
     /// @param name Name of the student.
     /// @param age Age of the student.
-    event AddStudentEvent (address indexed studentAddr, uint256 studentId, string name, uint8 age);
+    event AddStudentEvent(address indexed studentAddr, uint256 studentId, string name, uint8 age);
 
     /// @notice Event emitted when a student is deleted.
     /// @param studentAddr Address of the student.
-    event DeleteStudentEvent (address indexed studentAddr);
+    event DeleteStudentEvent(address indexed studentAddr);
 
     constructor() {
         owner = msg.sender;
@@ -35,16 +34,16 @@ contract StudentRegistry {
     Student[] private students;
 
     /// @dev Mapping from student address to student details.
-    mapping (address => Student) private studentMapping;
+    mapping(address => Student) private studentMapping;
 
     /// @dev Modifier to restrict functions to only the owner.
-    modifier onlyOwner () {
+    modifier onlyOwner() {
         require(owner == msg.sender, "You fraud!!");
         _;
     }
 
     /// @dev Modifier to ensure the address is not zero.
-    modifier isNotAdressZero() {
+    modifier isNotAddressZero() {
         require(msg.sender != address(0), "Invalid address");
         _;
     }
@@ -57,8 +56,7 @@ contract StudentRegistry {
         address _studentAddr, 
         string memory _name, 
         uint8 _age
-        ) public onlyOwner isNotAdressZero {
-
+    ) public onlyOwner isNotAddressZero {
         require(bytes(_name).length > 0, "Name cannot be blank");
         require(_age >= 18, "You are not up to age");
         uint256 _studentId = students.length + 1;
@@ -97,7 +95,7 @@ contract StudentRegistry {
         address _studentAddr,
         string memory _name, 
         uint8 _age
-        ) public onlyOwner isNotAdressZero {
+    ) public onlyOwner isNotAddressZero {
         require(_age >= 18, "Student must be at least 18 years old");
 
         Student storage student = studentMapping[_studentAddr];
@@ -109,15 +107,18 @@ contract StudentRegistry {
         uint256 index = student.studentId - 1;
         students[index].name = _name;
         students[index].age = _age;
+
+        // Optionally, emit an event if desired
+        // emit UpdatedStudentEvent(_studentAddr, student.studentId, _name, _age);
     }
 
     /// @notice Deletes a student from the registry.
     /// @param _studentAddr Address of the student to delete.
-    function deleteStudentFromMapping(address _studentAddr) public onlyOwner isNotAdressZero {
+    function deleteStudentFromMapping(address _studentAddr) public onlyOwner isNotAddressZero {
         require(studentMapping[_studentAddr].studentAddr != address(0), "Student does not exist");
 
         Student memory student = Student({
-            studentAddr: address(0x0),
+            studentAddr: address(0),
             name: "",
             age: 0,
             studentId: 0
@@ -125,9 +126,6 @@ contract StudentRegistry {
 
         studentMapping[_studentAddr] = student;
 
-
-        
         emit DeleteStudentEvent(_studentAddr);
-
     }
 }
