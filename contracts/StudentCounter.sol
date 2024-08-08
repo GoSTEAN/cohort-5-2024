@@ -7,27 +7,29 @@ pragma solidity >=0.7.0 <0.9.0;
  * It includes functions to get, increase, and decrease the student ID.
  */
 contract StudentCounter {
-    uint32 internal studentId = 0;
+    uint32 internal  studentId = 0;
 
     /**
      * @dev Retrieve the current student ID.
      * @return The current student ID.
      */
-    function getStudentId() internal view returns (uint32) {
+    function getStudentId() internal  view returns (uint32) {
         return studentId;
     }
 
     /**
      * @dev Increase the student ID by 1.
      */
-    function increaseStudentId() internal {
+    function increaseStudentId() internal  {
         studentId++;
     }
 
-    /**
+     /**
      * @dev Decrease the student ID by 1.
      */
-    function decreaseStudentId() internal {
+    function decreaseStudentId() internal  {
         studentId--;
     }
 }
+
+
