@@ -81,7 +81,7 @@ contract StudentRegistry is Ownable, StudentCounter{
      * @dev Authorize a student. Only the contract owner can authorize students.
      * @param _studentAddr The address of the student to authorize.
      */
-    function authorizeStudent(address _studentAddr) public onlyOwner  {
+    function authorizeStudent(address _studentAddr) public  {
         require(receipt[_studentAddr] == 1 ether, "Go and register");
 
         Student storage students = myStudents[_studentAddr];
@@ -105,25 +105,14 @@ contract StudentRegistry is Ownable, StudentCounter{
     /**
      * @dev Update student information.
      * Can change the address, name, or age of the student. Only the owner can update.
-     * @param _oldAddr The current address of the student.
      * @param _studentAddr The new address of the student.
      * @param _name The new name of the student.
      * @param _age The new age of the student.
      */
-    function updateStudent(address _oldAddr, address _studentAddr, string memory _name, uint8 _age) public onlyOwner notAddress notUpToAge(_age) nameNoEmpty(_name) {
-        require(_oldAddr == _studentAddr || _studentAddr != myStudents[_oldAddr].studentAddr, "Invalid operation"); // Combined check
-
-        Student storage student = myStudents[_oldAddr];
+    function updateStudent( address _studentAddr, string memory _name, uint8 _age) public  notAddress notUpToAge(_age) nameNoEmpty(_name) {
+        Student storage student = myStudents[_studentAddr];
         student.name = _name;
         student.age = _age;
-
-        // Update receipt if student address changes
-        if (_oldAddr != _studentAddr) {
-            delete myStudents[_oldAddr];
-            myStudents[_studentAddr] = student;
-            receipt[_studentAddr] = receipt[_oldAddr];
-            delete receipt[_oldAddr];
-        }
     }
 
     /**
@@ -134,12 +123,10 @@ contract StudentRegistry is Ownable, StudentCounter{
         require(myStudents[_studentAddr].studentAddr != address(0), "Student does not exist");
 
         delete myStudents[_studentAddr];
-
+        myStudentId[_studentAddr] = getStudentId();
         decreaseStudentId();
-        myStudentId[_studentAddr] = studentId;
 
     }
-
     
     /**
      * @dev Withdraw all Ether from the contract to the owner's address.
