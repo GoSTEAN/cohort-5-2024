@@ -29,9 +29,7 @@ contract MyStudentRegistry is Ownable, StudentCounter {
     mapping  (address => uint256) public receipt;
     mapping  (address => uint32) public myStudentId;
 
-    function setStudentRegistry(address _studentRegistryAddr) public onlyOwner {
-    studentRegistry = _studentRegistryAddr;
-}
+
     /**
      * @dev Register a student by forwarding the call to the StudentRegistry contract.
      * @param _studentAddr The address of the student to register.
