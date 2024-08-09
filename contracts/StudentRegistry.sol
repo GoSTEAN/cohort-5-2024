@@ -81,7 +81,7 @@ contract StudentRegistry is Ownable, StudentCounter{
      * @dev Authorize a student. Only the contract owner can authorize students.
      * @param _studentAddr The address of the student to authorize.
      */
-    function authorizeStudent(address _studentAddr) public  {
+    function authorizeStudent(address _studentAddr) public onlyOwner  {
         require(receipt[_studentAddr] == 1 ether, "Go and register");
 
         Student storage students = myStudents[_studentAddr];
