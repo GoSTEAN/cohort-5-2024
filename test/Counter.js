@@ -2,9 +2,9 @@ const {
     time,
     loadFixture,
   } = require("@nomicfoundation/hardhat-toolbox/network-helpers");
-  //   const { anyValue } = require("@nomicfoundation/hardhat-chai-matchers/withArgs");
+    const { anyValue } = require("@nomicfoundation/hardhat-chai-matchers/withArgs");
   const { expect } = require("chai");
-  // const { ethers } = require("hardhat");
+  const { ethers } = require("hardhat");
   
   describe("Counter Test Suite", () => {
     // deploy util function
@@ -101,5 +101,28 @@ const {
         });
       });
     });
+    describe("Events", () => {
+      describe("CountIncreased", () => {
+        it("should emit CountIncreased event on increaseByOne function", async () => {
+          const deployedCounter = await loadFixture(deployUtil);
+    
+          await expect(deployedCounter.increaseByOne())
+            .to.emit(deployedCounter, "CountIncreased")
+            .withArgs(1, anyValue);
+        });
+      });
+    
+      describe("CounterDecreased", () => {
+        it("should emit CounterDecreased event on decreaseByOne function", async () => {
+          const deployedCounter = await loadFixture(deployUtil);
+    
+          await deployedCounter.increaseByOne();
+          await expect(deployedCounter.decreaseByOne())
+            .to.emit(deployedCounter, "CountDecreased")
+            .withArgs(0, anyValue);  // Make sure the expected arguments are correct
+        });
+      });
+    });
+    
   });
   
