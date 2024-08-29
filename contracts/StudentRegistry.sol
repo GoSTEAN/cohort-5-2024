@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.7.0 <0.9.0;
 
-import "contracts/StudentStruct.sol";
+import "contracts/Student.sol";
 import "contracts/Ownable.sol";
 import "contracts/StudentCounter.sol";
 
@@ -68,6 +68,7 @@ contract StudentRegistry is Ownable, StudentCounter{
             studentId: 0,
             name: _name,
             age: _age,
+            hasPaid: true,
             isAuthorized: false
         });
 
