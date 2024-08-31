@@ -27,9 +27,10 @@ contract StudentRegistryV2 is Ownable {
 
     // Function For Paying
     function payFee() public payable {
-        require(msg.value > 0, "No ether sent");
-        address(this).transfer(msg.value);
-        // require(msg.value == 1 ether, "Oga you no go like pay");
+        require(msg.value == 1, "You must pay fee");
+        require(msg.sender != owner, "Owner is excluded");
+        (bool success, ) = address(this).call{value: msg.value}("");
+        require(success, "failed to send ETH");
         hasPaidMapping[msg.sender] = true;
     }
 
@@ -161,4 +162,12 @@ contract StudentRegistryV2 is Ownable {
     function getOwner() public view returns (address) {
         return owner;
     }
+
+    receive() external payable {}
+    
+
+    // fallback() external payable {
+
+    // }
+
 }
