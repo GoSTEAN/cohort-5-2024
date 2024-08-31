@@ -5,7 +5,7 @@ import "./Student.sol";
 contract Ownable {
 
     // Empty variable to set the address of the owner
-    address payable  internal owner;
+    address payable public owner;
 
     event ChangeOwner(address indexed oldOwner, address indexed  newOwner);
 
@@ -29,9 +29,13 @@ contract Ownable {
     }
 
     // Function to get the owner of the contract
+<<<<<<< HEAD
     function getOwner() internal  view returns (address){
         return owner;
     }
+=======
+   
+>>>>>>> 8da88f334a43363adf5f549ff1a4b6f0c5a6caf3
 
     // Function to change the owner using an address as a parmeter 
     function changeOwner(address payable _newOwner) public onlyOwner {
@@ -41,7 +45,7 @@ contract Ownable {
     }
 
      // Function to get the contract's balance
-    function getBalance() public view returns (uint256) {
+    function getBalance() internal view returns (uint256) {
         return address(owner).balance;
     }
 
