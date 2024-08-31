@@ -53,9 +53,13 @@ describe("StudentRegistryV2 Test Suite", () => {
   describe("Transactions", () => {
     describe("PayFee Transaction", () => {
       describe("Validations", () => {
-        it("should revert attempt to proceed without paying 1ETH as payment fee", async () => {
-          const { deployedStudentRegistryV2, owner, ZERO_ADDRESS, addr1 } = await loadFixture(deployUtil);
-         await expect(deployedStudentRegistryV2.connect(addr1).payFee({value: convertEther('0')})).to.be.rejectedWith("You must pay fee")
+        it("should revert owner attempt to paying 1ETH as fee", async () => {
+          const { deployedStudentRegistryV2, owner } = await loadFixture(deployUtil);
+         await expect(deployedStudentRegistryV2.connect(owner).payFee({value: convertEther('1')})).to.be.revertedWith("Owner is excluded")
+        });
+        it("should revert attempt to proceed without paying 1ETH as fee", async () => {
+          const { deployedStudentRegistryV2, addr1 } = await loadFixture(deployUtil);
+         await expect(deployedStudentRegistryV2.connect(addr1).payFee({value: convertEther('0')})).to.be.revertedWith("You must pay fee")
         });
       });
     });

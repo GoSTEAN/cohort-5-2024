@@ -27,8 +27,8 @@ contract StudentRegistryV2 is Ownable {
 
     // Function For Paying
     function payFee() public payable {
-        require(msg.value == 1, "You must pay fee");
         require(msg.sender != owner, "Owner is excluded");
+        require(msg.value == 1, "You must pay fee");
         (bool success, ) = address(this).call{value: msg.value}("");
         require(success, "failed to send ETH");
         hasPaidMapping[msg.sender] = true;
