@@ -1,50 +1,57 @@
-// SPDX-License-Identifier: MIT
-pragma solidity >=0.7.0 <0.9.0;
+// SPDX-License-Identifier: GPL-3.0
+pragma solidity ^0.8.14;
 
-/**
- * @title Ownable
- * @dev This contract sets up an ownership system.
- * It allows for transferring ownership and restricting access to certain functions to the owner only.
- */
 contract Ownable {
-    address public  owner;
 
-    event changedOwner(address indexed newOwner, address indexed oldOwner, string message);
+    // Empty variable to set the address of the owner
+    address payable  internal owner;
 
+    event ChangeOwner(address indexed oldOwner, address indexed  newOwner);
 
-    /**
-     * @dev Sets the initial owner of the contract to the address deploying the contract.
-     */
-    constructor () payable {
-        owner = payable (msg.sender);
+    //constructor to save the deployer of the contract in the owner variable
+    constructor() payable {
+        owner = payable(msg.sender);
     }
 
-   /**
-     * @dev Modifier to restrict function access to the contract owner only.
-     */
-    modifier onlyOwner() {
-        require(owner == msg.sender, "You are not allowed");
+    // Function to allow the contract to receive Ether
+    // receive() external payable {}
+
+    // Modifier to allow only the deployer of the Contract to be the owner
+    modifier  onlyOwner {
+        require(owner == msg.sender, "Caller not owner");
         _;
     }
 
-    /**
-     * @dev Retrieve the current owner of the contract.
-     * @return The address of the current owner.
-     */
-    function getOwner() internal  view returns (address) {
-        return  owner;
+    modifier isNotAddressZero() {
+        require(msg.sender != address(0), "Invalid Address");
+        _;
     }
 
-    /**
-     * @dev Change the owner of the contract to a new address.
-     * @param _newOwner The address of the new owner.
-     * Emits a {changedOwner} event.
-     */
-    function changeOwner(address  payable _newOwner)  public onlyOwner {
-        require(_newOwner != address(0), "Invalid address");
+    // Function to get the owner of the contract
+    function getOwner() public  view returns (address){
+        return owner;
+    }
 
-        emit changedOwner(_newOwner, owner, "This owner has been changed");
+    // Function to change the owner using an address as a parmeter 
+    function changeOwner(address payable _newOwner) public onlyOwner {
+        require(_newOwner != address(0), "Owner cannot be address zero");
+        emit ChangeOwner(owner, _newOwner);
         owner = _newOwner;
-
     }
+
+     // Function to get the contract's balance
+    function getBalance() public view returns (uint256) {
+        return address(owner).balance;
+    }
+
+    // Function to withdraw the contract's balance to the owner
+    // function withdraw() public onlyOwner  virtual {
+    //     uint256 balance = address(this).balance;
+    //     require(balance > 0, "No funds to withdraw");
+
+    //     owner.transfer(balance);
+
+    // }
+
+    
 }
