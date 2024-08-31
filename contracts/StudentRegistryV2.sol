@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.24;
+pragma solidity ^0.8.14;
 import "./Ownable.sol";
 import "./Student.sol";
 
@@ -71,6 +71,7 @@ contract StudentRegistryV2 is Ownable {
         emit authorizeStudentReg (_studentAddr);
 
     }
+    
 
     // Function for Adding student, this function is called in the authorizeStudentRegistration() function
     function addStudent(

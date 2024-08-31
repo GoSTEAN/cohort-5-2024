@@ -1,9 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.14;
-<<<<<<< HEAD
-=======
 import "./Student.sol";
->>>>>>> 7c4354bef0c1a6954d33b5d6468d7ae7ae5a0d63
 
 contract Ownable {
 
@@ -32,20 +29,15 @@ contract Ownable {
     }
 
     // Function to get the owner of the contract
-    function getOwner() public  view returns (address){
+    function getOwner() internal  view returns (address){
         return owner;
     }
 
     // Function to change the owner using an address as a parmeter 
     function changeOwner(address payable _newOwner) public onlyOwner {
         require(_newOwner != address(0), "Owner cannot be address zero");
-<<<<<<< HEAD
         emit ChangeOwner(owner, _newOwner);
         owner = _newOwner;
-=======
-        owner = _newOwner;
-        emit ChangeOwner(owner, _newOwner);
->>>>>>> 7c4354bef0c1a6954d33b5d6468d7ae7ae5a0d63
     }
 
      // Function to get the contract's balance
