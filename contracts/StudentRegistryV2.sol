@@ -28,7 +28,7 @@ contract StudentRegistryV2 is Ownable {
     // Function For Paying
     function payFee() public payable {
         require(msg.sender != owner, "Owner is excluded");
-        require(msg.value == 1, "You must pay fee");
+        require(msg.value == 1 ether, "You must pay fee");
         (bool success, ) = address(this).call{value: msg.value}("");
         require(success, "failed to send ETH");
         hasPaidMapping[msg.sender] = true;
@@ -155,13 +155,14 @@ contract StudentRegistryV2 is Ownable {
     }
 
 
-    function getAllStudents() public view returns (Student[] memory students) {
+    function getAllStudents() public view  returns (Student[] memory students) {
         return students;
     }
 
-    function getOwner() public view returns (address) {
-        return owner;
+    function getOwner() public view override returns (address) {
+        return super.getOwner();
     }
+
 
     receive() external payable {}
     
