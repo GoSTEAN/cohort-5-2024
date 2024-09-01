@@ -284,7 +284,7 @@ describe("StudentRegistryV2 Test Suite", () => {
         });
       });
       describe("Event", function () {
-        it.only("should emit authorizeStudentReg", async () => {
+        it("should emit authorizeStudentReg", async () => {
           const { deployedStudentRegistryV2, owner, addr1 } = await loadFixture(deployUtil);
 
           // Make a payment first from addr1
@@ -295,10 +295,48 @@ describe("StudentRegistryV2 Test Suite", () => {
 
           // Perform the authorization and expect the event
           await expect(deployedStudentRegistryV2.connect(owner).authorizeStudentRegistration(addr1.address))
-            .to.emit(deployedStudentRegistryV2, "authorizeStudentReg")
+            .to.emit(deployedStudentRegistryV2, "AuthorizeStudentReg")
             .withArgs(addr1.address);
         });
       });
+    });
+    describe("Add Student Functionality", function () {
+      describe("Add student to the struct", function () {
+        it("should add a student", async () => {
+          const { deployedStudentRegistryV2, owner, addr1 } = await loadFixture(deployUtil);
+
+          await deployedStudentRegistryV2.connect(addr1).payFee({ value: ethers.parseEther("1") });
+
+          // Register addr1 as a temporary student
+          await deployedStudentRegistryV2.connect(owner).register(addr1.address, "Alice", 20);
+
+          // Authorize addr1 and add them as a student
+          await deployedStudentRegistryV2.connect(owner).authorizeStudentRegistration(addr1.address);
+
+          // Verify the student was added
+          const student = await deployedStudentRegistryV2.studentsMapping(addr1.address);
+          expect(student.studentAddr).to.equal(addr1.address);
+          expect(student.name).to.equal("Alice");
+          expect(student.age).to.equal(20);
+          expect(student.hasPaid).to.be.true;
+          expect(student.isAuthorized).to.be.false;
+        });
+      });
+      describe("Event", function () {
+        it("should emit", async () => {
+          const { deployedStudentRegistryV2, owner, addr1 } = await loadFixture(deployUtil);
+
+          await deployedStudentRegistryV2.connect(addr1).payFee({ value: ethers.parseEther("1") });
+
+          // Register addr1 as a temporary student
+          await deployedStudentRegistryV2.connect(owner).register(addr1.address, "Alice", 20);
+
+          await expect(deployedStudentRegistryV2.connect(owner).authorizeStudentRegistration(addr1.address))
+            .to.emit(deployedStudentRegistryV2, "AddStudent")
+            .withArgs(addr1.address);
+        });
+      });
+      // Check that the event was emitted
     });
   });
 });

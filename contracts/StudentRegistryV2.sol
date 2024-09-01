@@ -22,8 +22,8 @@ contract StudentRegistryV2 is Ownable {
         string _StName,
         uint8 _stAge
     );
-    event authorizeStudentReg(address _studentAddress);
-    event addStud(address _studentAddr);
+    event AuthorizeStudentReg(address _studentAddress);
+    event AddStudent(address _studentAddr);
     event PaidFee(address indexed payer, uint256 amount);
 
     // Function For Paying
@@ -81,7 +81,7 @@ contract StudentRegistryV2 is Ownable {
             "You're already authorized"
         );
         addStudent(_studentAddr);
-        emit authorizeStudentReg(_studentAddr);
+        emit AuthorizeStudentReg(_studentAddr);
     }
 
     // Function for Adding student, this function is called in the authorizeStudentRegistration() function
@@ -100,7 +100,7 @@ contract StudentRegistryV2 is Ownable {
 
         // add student to Studentmapping
         studentsMapping[_studentAddr] = student;
-        emit addStud(_studentAddr);
+        emit AddStudent(_studentAddr);
     }
 
     // Function to get student by call the ID
