@@ -122,15 +122,38 @@ describe("StudentRegistryV2 Test Suite", () => {
           // Check that the contract's balance increased by 1 ETH
           expect(finalContractBalanceNum).to.be.closeTo(initialContractBalanceNum + 1, 0.01); // Use a tolerance for floating point comparison
         });
-        describe("Event", () => {
-          it("should emit PaidFee", async () => {
-            const { deployedStudentRegistryV2, addr1 } = await loadFixture(deployUtil);
+      });
+      describe("Event", () => {
+        it("should emit PaidFee", async () => {
+          const { deployedStudentRegistryV2, addr1 } = await loadFixture(deployUtil);
 
-            await expect(deployedStudentRegistryV2.connect(addr1).payFee({ value: ethers.parseEther("1") }))
-              .to.emit(deployedStudentRegistryV2, "PaidFee")
-              .withArgs(addr1.address, ethers.parseEther("1"));
-          });
+          await expect(deployedStudentRegistryV2.connect(addr1).payFee({ value: ethers.parseEther("1") }))
+            .to.emit(deployedStudentRegistryV2, "PaidFee")
+            .withArgs(addr1.address, ethers.parseEther("1"));
         });
+      });
+    });
+    describe("RegisterStudent Transaction", () => {
+      it.only("should successfully register a student", async function () {
+        const { deployedStudentRegistryV2, addr1, addr2, deployedStudentRegistryV2Address, owner } = await loadFixture(
+          deployUtil
+        );
+
+        // Make a payment first
+        await deployedStudentRegistryV2.connect(addr1).payFee({ value: ethers.parseEther("1") });
+
+        // Perform registration
+        await expect(deployedStudentRegistryV2.connect(addr1).register(addr2.address, "Alice", 20))
+          .to.emit(deployedStudentRegistryV2, "registerStudent")
+          .withArgs(addr2.address, "Alice", 20);
+
+        // Verify the student was added
+        const student = await deployedStudentRegistryV2.tempstudentsMapping(addr2.address);
+        expect(student.studentAddr).to.equal(addr2.address);
+        expect(student.name).to.equal("Alice");
+        expect(student.age).to.equal(20);
+        expect(student.hasPaid).to.be.true;
+        expect(student.isAuthorized).to.be.false;
       });
     });
   });
