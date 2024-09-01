@@ -122,7 +122,7 @@ describe("StudentRegistryV2 Test Suite", () => {
         });
       });
     });
-    describe.only("Registration", function () {
+    describe("Registration", function () {
       describe("Validation", function () {
         it("should revert if the address is already registered", async () => {
           const { deployedStudentRegistryV2, owner, addr1 } = await loadFixture(deployUtil);
@@ -215,6 +215,88 @@ describe("StudentRegistryV2 Test Suite", () => {
           await expect(registerTx)
             .to.emit(deployedStudentRegistryV2, "registerStudent")
             .withArgs(addr1.address, "Alice", 20);
+        });
+      });
+    });
+    describe("Authorization", function () {
+      describe("Validation", function () {
+        it("should revert if the address is already authorized", async () => {
+          const { deployedStudentRegistryV2, owner, addr1 } = await loadFixture(deployUtil);
+
+          // Make a payment first from addr1
+          await deployedStudentRegistryV2.connect(addr1).payFee({ value: ethers.parseEther("1") });
+
+          // Register addr1 as a temporary student
+          await deployedStudentRegistryV2.connect(owner).register(addr1.address, "Alice", 20);
+
+          // Authorize the registered student
+          await deployedStudentRegistryV2.connect(owner).authorizeStudentRegistration(addr1.address);
+
+          // Attempt to authorize the same address again and expect it to revert
+          await expect(
+            deployedStudentRegistryV2.connect(owner).authorizeStudentRegistration(addr1.address)
+          ).to.be.revertedWith("You're already authorized");
+        });
+        it("should allow the owner to authorize a registered student", async () => {
+          const { deployedStudentRegistryV2, owner, addr1 } = await loadFixture(deployUtil);
+
+          // Make a payment first from addr1
+          await deployedStudentRegistryV2.connect(addr1).payFee({ value: ethers.parseEther("1") });
+
+          // Register addr1 as a temporary student
+          await deployedStudentRegistryV2.connect(owner).register(addr1.address, "Alice", 20);
+
+          // Authorize the registered student
+          const authorizeTx = await deployedStudentRegistryV2
+            .connect(owner)
+            .authorizeStudentRegistration(addr1.address);
+          await authorizeTx.wait();
+
+          it("should allow the owner to authorize a registered student", async () => {
+            const { deployedStudentRegistryV2, owner, addr1, addr2 } = await loadFixture(deployUtil);
+
+            // Make a payment first from addr1
+            await deployedStudentRegistryV2.connect(addr1).payFee({ value: ethers.parseEther("1") });
+
+            // Register addr1 as a temporary student
+            await deployedStudentRegistryV2.connect(owner).register(addr1.address, "Alice", 20);
+
+            // Authorize the registered student
+            const authorizeTx = await deployedStudentRegistryV2
+              .connect(owner)
+              .authorizeStudentRegistration(addr1.address);
+            await authorizeTx.wait();
+
+            await expect(
+              deployedStudentRegistryV2.connect(owner).authorizeStudentRegistration(addr2.address)
+            ).to.be.revertedWith("Invalid Address");
+          });
+        });
+      });
+      describe("Only owner Authorization", function () {
+        it("should authorize registered student", async () => {
+          const { deployedStudentRegistryV2, owner, addr1 } = await loadFixture(deployUtil);
+
+          await deployedStudentRegistryV2.connect(addr1).payFee({ value: ethers.parseEther("1") });
+          await deployedStudentRegistryV2.connect(owner).register(addr1.address, "Alice", 20);
+
+          expect(deployedStudentRegistryV2.connect(owner).authorizeStudentRegistration(addr1.address));
+        });
+      });
+      describe("Event", function () {
+        it.only("should emit authorizeStudentReg", async () => {
+          const { deployedStudentRegistryV2, owner, addr1 } = await loadFixture(deployUtil);
+
+          // Make a payment first from addr1
+          await deployedStudentRegistryV2.connect(addr1).payFee({ value: ethers.parseEther("1") });
+
+          // Register addr1 as a temporary student
+          await deployedStudentRegistryV2.connect(owner).register(addr1.address, "Alice", 20);
+
+          // Perform the authorization and expect the event
+          await expect(deployedStudentRegistryV2.connect(owner).authorizeStudentRegistration(addr1.address))
+            .to.emit(deployedStudentRegistryV2, "authorizeStudentReg")
+            .withArgs(addr1.address);
         });
       });
     });
