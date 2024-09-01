@@ -24,6 +24,7 @@ contract StudentRegistryV2 is Ownable {
     );
     event authorizeStudentReg(address _studentAddress);
     event addStud(address _studentAddr);
+    event PaidFee(address indexed payer, uint256 amount);
 
     // Function For Paying
     function payFee() public payable {
@@ -32,6 +33,7 @@ contract StudentRegistryV2 is Ownable {
         (bool success, ) = address(this).call{value: msg.value}("");
         require(success, "failed to send ETH");
         hasPaidMapping[msg.sender] = true;
+        emit PaidFee(msg.sender, 1 ether);
     }
 
     // Function for Registration

@@ -85,7 +85,7 @@ describe("StudentRegistryV2 Test Suite", () => {
       });
 
       describe("Success", () => {
-        it.only("should successfully process payment of 1 ETH fee", async () => {
+        it("should successfully process payment of 1 ETH fee", async () => {
           const { deployedStudentRegistryV2, addr1, deployedStudentRegistryV2Address, owner } = await loadFixture(
             deployUtil
           );
@@ -121,6 +121,17 @@ describe("StudentRegistryV2 Test Suite", () => {
 
           // Check that the contract's balance increased by 1 ETH
           expect(finalContractBalanceNum).to.be.closeTo(initialContractBalanceNum + 1, 0.01); // Use a tolerance for floating point comparison
+        });
+        describe.only("Event", () => {
+          it("should emit PaidFee", async () => {
+            const { deployedStudentRegistryV2, addr1, deployedStudentRegistryV2Address, owner } = await loadFixture(
+              deployUtil
+            );
+
+            await expect(deployedStudentRegistryV2.connect(addr1).payFee({ value: ethers.parseEther("1") }))
+              .to.emit(deployedStudentRegistryV2, "PaidFee")
+              .withArgs(addr1.address, ethers.parseEther("1"));
+          });
         });
       });
     });
