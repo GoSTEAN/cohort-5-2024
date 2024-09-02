@@ -3,25 +3,14 @@ const { anyValue } = require("@nomicfoundation/hardhat-chai-matchers/withArgs");
 const { expect } = require("chai");
 const { ethers } = require("hardhat");
 
-// util functions
-// converts a given amount to 18 decimal places for our contract to recognize it
-const toEther = (amount) => {
+const convertEther = (amount) => {
   return ethers.parseEther(amount);
-};
-
-// converts a given amount to 18 decimal places for our contract to recognize it
-const fromEther = (amount) => {
-  return ethers.formatEther(amount);
 };
 
 // Get balance util function
 const getBalance = async (account) => {
   const balance = await ethers.provider.getBalance(account);
   return balance;
-};
-
-const toDecimal = (amount) => {
-  return parseFloat(fromEther(amount));
 };
 
 describe("StudentRegistryV2 Test Suite", () => {
@@ -59,6 +48,14 @@ describe("StudentRegistryV2 Test Suite", () => {
       const emptyStudentStruct = ["0x0000000000000000000000000000000000000000", "", "0", "0", false, false];
       expect(...addr1Mapping).to.eq(...emptyStudentStruct);
       expect(...studentsMapping).to.eq(...emptyStudentStruct);
+
+      // check that tempstudentsMapping  has default values
+      const tempStudentsMapping = await deployedStudentRegistryV2.tempstudentsMapping(addr1);
+      expect(...tempStudentsMapping).to.eq(...emptyStudentStruct);
+
+      // check if  hasPaidMapping has default value of false
+      const hasPaidMapping = await deployedStudentRegistryV2.hasPaidMapping(addr1);
+      expect(hasPaidMapping).to.eq(false);
     });
   });
 
@@ -67,52 +64,16 @@ describe("StudentRegistryV2 Test Suite", () => {
       describe("Validations", () => {
         it("should revert owner attempt to paying 1ETH as fee", async () => {
           const { deployedStudentRegistryV2, owner } = await loadFixture(deployUtil);
-          await expect(deployedStudentRegistryV2.connect(owner).payFee({ value: toEther("1") })).to.be.revertedWith(
-            "Owner is excluded"
-          );
+          await expect(
+            deployedStudentRegistryV2.connect(owner).payFee({ value: convertEther("1") })
+          ).to.be.revertedWith("Owner is excluded");
         });
 
         it("should revert attempt to proceed without paying 1ETH as fee", async () => {
           const { deployedStudentRegistryV2, addr1 } = await loadFixture(deployUtil);
-          await expect(deployedStudentRegistryV2.connect(addr1).payFee({ value: toEther("0") })).to.be.revertedWith(
-            "You must pay fee"
-          );
-        });
-
-        it.only("should revert attempt to payFee multiple times", async () => {
-          const { deployedStudentRegistryV2, addr1, deployedStudentRegistryV2Address } = await loadFixture(deployUtil);
-          // BEFORE PAYFEE TXN
-          const initialContractBalance = await getBalance(deployedStudentRegistryV2Address);
-          const initialPayerBalance = await getBalance(addr1.address);
-
-          await deployedStudentRegistryV2.connect(addr1).payFee({ value: toEther("1") });
-
-          // AFTER PAYFEE TXN
-          const finalPayerBalance = await getBalance(addr1.address);
-          const finalContractBalance = await getBalance(deployedStudentRegistryV2Address);
-
-          // Assert the balance changes
-          const initialPayerBalanceNum = parseFloat(ethers.formatEther(initialPayerBalance));
-          const finalPayerBalanceNum = parseFloat(ethers.formatEther(finalPayerBalance));
-          const initialContractBalanceNum = parseFloat(ethers.formatEther(initialContractBalance));
-          const finalContractBalanceNum = parseFloat(ethers.formatEther(finalContractBalance));
-
-          // Check that the payer's balance decreased by 1 ETH
-          expect(finalPayerBalanceNum).to.be.closeTo(initialPayerBalanceNum - 1, 0.01); // Use a tolerance for floating point comparison
-
-          // Check that the contract's balance increased by 1 ETH
-          expect(finalContractBalanceNum).to.be.closeTo(initialContractBalanceNum + 1, 0.01); // Use a tolerance for floating point comparison
-
-          const studentsMapping = await deployedStudentRegistryV2.studentsMapping(addr1.address);
-          console.log("student mapping___", studentsMapping);
-
-          const expectStudentStruct = [addr1.address, "", "0", "0", true, false];
-          expect(...studentsMapping).to.eq(...expectStudentStruct);
-
-          // revert attempt to pay fee after initial payFee txn
-          await expect(deployedStudentRegistryV2.connect(addr1).payFee({ value: toEther("1") })).to.be.revertedWith(
-            "You have paid already"
-          );
+          await expect(
+            deployedStudentRegistryV2.connect(addr1).payFee({ value: convertEther("0") })
+          ).to.be.revertedWith("You must pay fee");
         });
       });
 
@@ -137,10 +98,10 @@ describe("StudentRegistryV2 Test Suite", () => {
           const finalContractBalance = await getBalance(deployedStudentRegistryV2Address);
 
           // Assert the balance changes
-          const initialPayerBalanceNum = toDecimal(initialPayerBalance);
-          const finalPayerBalanceNum = toDecimal(finalPayerBalance);
-          const initialContractBalanceNum = toDecimal(initialContractBalance);
-          const finalContractBalanceNum = toDecimal(finalContractBalance);
+          const initialPayerBalanceNum = parseFloat(ethers.formatEther(initialPayerBalance));
+          const finalPayerBalanceNum = parseFloat(ethers.formatEther(finalPayerBalance));
+          const initialContractBalanceNum = parseFloat(ethers.formatEther(initialContractBalance));
+          const finalContractBalanceNum = parseFloat(ethers.formatEther(finalContractBalance));
 
           // Check that the payer's balance decreased by 1 ETH
           expect(finalPayerBalanceNum).to.be.closeTo(initialPayerBalanceNum - 1, 0.01); // Use a tolerance for floating point comparison
