@@ -8,13 +8,14 @@ contract StudentRegistryV2 is Ownable {
     error NameIsEmpty();
     error UnderAge(uint8 age, uint8 expectedAge);
 
+    uint constant public FEE = 1 ether;
     //dynamic array of students
     Student[] public students;
 
+
     // Mappings for my Student Registery Contract
     mapping(address => Student) public studentsMapping;
-    mapping(address => Student) public tempstudentsMapping;
-    mapping(address => bool) public hasPaidMapping;
+ 
 
     // Events for my student registry Contract
     event registerStudent(
@@ -29,52 +30,34 @@ contract StudentRegistryV2 is Ownable {
     // Function For Paying
     function payFee() public payable {
         require(msg.sender != owner, "Owner is excluded");
-        require(msg.value == 1 ether, "You must pay fee");
+        require(msg.value == FEE, "You must pay fee");
+        Student storage student =  studentsMapping[msg.sender];
+        require(student.hasPaid == false, "You have paid already"); 
         (bool success, ) = address(this).call{value: msg.value}("");
         require(success, "failed to send ETH");
-        hasPaidMapping[msg.sender] = true;
-        emit PaidFee(msg.sender, 1 ether);
+        student.studentAddr = msg.sender;
+        student.hasPaid = true;
+
+        emit PaidFee(msg.sender, FEE);
     }
 
     // Function for Registration
     function register(
-        address _studentAddr,
         string memory _name,
         uint8 _age
     ) public payable {
-        require(
-            tempstudentsMapping[_studentAddr].studentAddr == address(0),
-            "You're already registered"
-        );
-        require(hasPaidMapping[msg.sender], "You must pay first");
         require(bytes(_name).length > 0, "No name has been inputed");
         require(_age >= 18, "name should be 18 or more");
-
-        uint256 _studentId = students.length + 1;
-        // A variable is defined to match the array format and datatype
-        Student memory tempstudent = Student({
-            studentAddr: _studentAddr,
-            name: _name,
-            age: _age,
-            studentId: _studentId,
-            hasPaid: true,
-            isAuthorized: false
-        });
-        students.push(tempstudent);
-
-        // add student to Studentmapping
-        tempstudentsMapping[_studentAddr] = tempstudent;
-        emit registerStudent(_studentAddr, _name, _age);
+        Student storage student =  studentsMapping[msg.sender];
+        student.name = _name;
+        student.age = _age;
+        emit registerStudent(msg.sender, _name, _age);
     }
 
     // Function for authorizing registered Student
     function authorizeStudentRegistration(
         address _studentAddr
     ) public onlyOwner {
-        require(
-            tempstudentsMapping[_studentAddr].studentAddr != address(0),
-            "Invalid Address"
-        );
         require(
             studentsMapping[_studentAddr].studentAddr == address(0),
             "You're already registered"
@@ -86,20 +69,7 @@ contract StudentRegistryV2 is Ownable {
     // Function for Adding student, this function is called in the authorizeStudentRegistration() function
     function addStudent(address _studentAddr) private {
         uint256 _studentId = students.length + 1;
-        // A variable is defined to match the array format and datatype
-        Student memory student = Student({
-            studentAddr: tempstudentsMapping[_studentAddr].studentAddr,
-            name: tempstudentsMapping[_studentAddr].name,
-            age: tempstudentsMapping[_studentAddr].age,
-            studentId: _studentId,
-            hasPaid: true,
-            isAuthorized: false
-        });
-        students.push(student);
-
-        // add student to Studentmapping
-        studentsMapping[_studentAddr] = student;
-        emit addStud(_studentAddr);
+     
     }
 
     // Function to get student by call the ID
