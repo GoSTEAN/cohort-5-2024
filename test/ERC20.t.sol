@@ -9,6 +9,13 @@ contract ERC20ContractTest is Test {
     address ownerAddress = address(0x0101);
     address randomAddress = address(0x3892);
 
+    event Transfer(address indexed from, address indexed to, uint256 value);
+    event Approval(
+        address indexed owner,
+        address indexed spender,
+        uint256 value
+    );
+
     error InvalidRecipient();
 
     function setUp() public {
@@ -58,6 +65,9 @@ contract ERC20ContractTest is Test {
         );
         // Set msg.sender to `ownerAddress`
         vm.prank(ownerAddress);
+
+        vm.expectEmit(true, true, false, true);
+        emit Transfer(address(0), randomAddress, mintAmount);
         // Mint 1000 tokens to random address
         erc20Contract.mint(randomAddress, mintAmount);
         uint256 totalSupplyAfterMint = erc20Contract.totalSupply();
@@ -86,6 +96,9 @@ contract ERC20ContractTest is Test {
 
         // Set msg.sender to random address
         vm.startPrank(randomAddress);
+
+        vm.expectEmit(true, true, false, true);
+        emit Approval(randomAddress, caller, amount);
         // random address approves caller to spend `amount` tokens
         erc20Contract.approve(caller, amount);
         // Stop prank
