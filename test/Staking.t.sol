@@ -23,7 +23,7 @@ contract StakingContractTest is Test {
     address rewardTokenAddress;
 
     address ownerAddr;
-    address addr1;
+    // address addr1;
 
     function setUp() public {
         bwcErc20TokenContract = new ERC20("BlockheaderWeb3 Token", "BWC", 0);
@@ -106,14 +106,6 @@ contract StakingContractTest is Test {
             abi.encodeWithSignature("transferFrom(address,address,uint256)", user, address(stakingContract), stakeAmount),
             abi.encode(false) // Simulate a transfer failure
         );
-        // uint time = block.timestamp;
-        // bool status = true;
-        // bwcErc20TokenContract.approve(address(stakingContract), stakeAmount);
-
-        // // assertEq(stakingContract.getStakers(user).amount, stakeAmount);
-        // assertEq(stakingContract.getStakers(user).timeStaked, time);
-        // assertEq(stakingContract.getStakers(user).status, status);
-        
 
         vm.expectRevert("STAKE: Transfer failed");
         stakingContract.stake(stakeAmount);
@@ -172,8 +164,27 @@ function test_NextWithdrawal() public view {
     
     // }
 
-    function test_Withdraw() public {
-        uint256 amount = 100e18;
+    function test_GetStakeBalances() public {
+        address addr1 = address(0x42);
+        uint256 stakingAmounts = 100e18;
 
+        // Mint tokens to addr1 before staking
+        bwcErc20TokenContract.mint(addr1, stakingAmounts);
+
+        vm.startPrank(addr1);
+
+        // Approve and stake the amount
+        bwcErc20TokenContract.approve(address(stakingContract), stakingAmounts);
+        stakingContract.stake(stakingAmounts);
+
+        // Check the staked amount
+        assertEq(stakingContract.getStakers(addr1).amount, stakingAmounts);
+        vm.stopPrank();
     }
+
+
+    // function test_Withdraw() public {
+    //     uint256 amount = 100e18;
+
+    // }
 }
