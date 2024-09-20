@@ -151,18 +151,12 @@ contract StakingContractTest is Test {
         assertEq(stakingContract.getReceiptTokenAddress(), receiptTokenAddress, "The receive token address");
     }
 
-
-
-function test_NextWithdrawal() public view {
-    uint time = block.timestamp;
-    uint256 nextTime = time + MIN_TIME_BEFORE_WITHDRAW - block.timestamp;
-    uint256 actualTime = stakingContract.getNextWithdrawTime(user);
-    assertApproxEqAbs(actualTime, nextTime, 1, "The time left for the next withdrawal should be within 1 second of the expected time.");
-}
-
-    // function test_IsTimeToWithdraw() public {
-    
-    // }
+    function test_NextWithdrawal() public view {
+        uint time = block.timestamp;
+        uint256 nextTime = time + MIN_TIME_BEFORE_WITHDRAW - block.timestamp;
+        uint256 actualTime = stakingContract.getNextWithdrawTime(user);
+        assertApproxEqAbs(actualTime, nextTime, 1, "The time left for the next withdrawal should be within 1 second of the expected time.");
+    }
 
     function test_GetStakeBalances() public {
         address addr1 = address(0x42);
@@ -180,6 +174,18 @@ function test_NextWithdrawal() public view {
         // Check the staked amount
         assertEq(stakingContract.getStakers(addr1).amount, stakingAmounts);
         vm.stopPrank();
+    }
+
+    function test_IsTimeToWithdraw() public {
+        address addr1 = address(0x42);
+        uint256 stakeTime = stakingContract.getStakers(addr1).timeStaked;
+        uint256 minTime = MIN_TIME_BEFORE_WITHDRAW;
+        vm.warp(stakeTime + minTime);
+        uint256 stakedTime = stakeTime + MIN_TIME_BEFORE_WITHDRAW;
+        uint time = block.timestamp;
+        bool timeToWithdraw = time >= stakedTime;
+
+        assertTrue(timeToWithdraw, "Should be able to withdraw after the minimum time has passed");
     }
 
 
