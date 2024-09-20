@@ -189,8 +189,16 @@ contract StakingContractTest is Test {
     }
 
 
-    // function test_Withdraw() public {
-    //     uint256 amount = 100e18;
+    function test_WithdrawIsNotAddressZero() public {
+        uint256 amount = 100e18;
+        
+        vm.startPrank(address(0));
 
-    // }
+        vm.expectRevert("WITHDRAW: Address zero not allowed");
+        stakingContract.withdraw(amount);
+        
+        vm.stopPrank();
+    }
+
+
 }
