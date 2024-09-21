@@ -200,5 +200,24 @@ contract StakingContractTest is Test {
         vm.stopPrank();
     }
 
+    function test_WithdrawZeroAmount() public {
+        uint256 amount = 0;
+        vm.startPrank(user);
+        vm.expectRevert("WITHDRAW: Zero amount not allowed");
+        stakingContract.withdraw(amount);
+    }
+
+    function test_WithdrawAmountNotAllowed() public {
+        uint256 withdrawAmount = 150e18;
+
+        vm.startPrank(user);
+        bwcErc20TokenContract.approve(address(stakingContract), stakingAmount);
+
+        stakingContract.stake(stakingAmount);
+
+        vm.expectRevert("WITHDRAW: Withdraw amount not allowed");
+        stakingContract.withdraw(withdrawAmount);
+    }
+
 
 }
