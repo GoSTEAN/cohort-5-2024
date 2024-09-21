@@ -219,5 +219,34 @@ contract StakingContractTest is Test {
         stakingContract.withdraw(withdrawAmount);
     }
 
+    function test_WithdrawBeforeMinTime() public {
+        uint256 stakeAmount = 100e18;
+        uint256 withdrawAmount = 50e18;
+
+        vm.startPrank(user);
+        bwcErc20TokenContract.approve(address(stakingContract), stakeAmount);
+        stakingContract.stake(stakeAmount);
+
+        vm.expectRevert("WITHDRAW: Not yet time to withdraw");
+        stakingContract.withdraw(withdrawAmount);
+        vm.stopPrank();
+    }
+
+    function test_WithdrawInsufficientBalance() public {
+        uint256 stakeAmount = 100e18;
+        uint256 withdrawAmount = 50e18;
+
+        vm.startPrank(user);
+        bwcErc20TokenContract.approve(address(stakingContract), stakeAmount);
+        stakingContract.stake(stakeAmount);
+
+        vm.warp(block.timestamp + MIN_TIME_BEFORE_WITHDRAW+ 1);
+
+        rewardTokenContract.approve(address(stakingContract), withdrawAmount);
+
+        vm.expectRevert("WITHDRAW: Insufficient reward token balance");
+        stakingContract.withdraw(withdrawAmount);
+        vm.stopPrank();
+    }
 
 }
